@@ -2,41 +2,56 @@
 import React, { useState } from 'react';
 
 function HyroxTrainingTracker() {
-  const [date, setDate] = useState('');
+  const [week, setWeek] = useState('Week 0');
+  const [day, setDay] = useState('Day 1');
   const [sleep, setSleep] = useState('');
   const [sleepQuality, setSleepQuality] = useState('');
   const [recoveryNotes, setRecoveryNotes] = useState('');
-  const [exercises, setExercises] = useState([
-    { name: 'Deadlift', targetReps: 5, rpe: 8, reps: '', weight: '' },
-    { name: 'Push Press', targetReps: 5, rpe: 8, reps: '', weight: '' },
-    { name: 'Pull-Ups', targetReps: 5, rpe: 8, reps: '', weight: '' }
-  ]);
+  const [benchmarkData, setBenchmarkData] = useState({
+    weight: '', fatPercent: '', musclePercent: '',
+    cholesterol: '', glucose: '', crp: '',
+    run5kTime: '', squat1RM: '', deadlift1RM: '', metconTime: ''
+  });
 
-  const handleExerciseChange = (index, field, value) => {
-    const updated = [...exercises];
-    updated[index][field] = value;
-    setExercises(updated);
+  const handleBenchmarkChange = (field, value) => {
+    setBenchmarkData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
     const payload = {
-      date,
+      week,
+      day,
       sleep,
       sleepQuality,
       recoveryNotes,
-      exercises
+      benchmarkData
     };
-    console.log("Workout Saved:", payload);
-    alert("Workout logged! (This will save to Firebase in the full version)");
+    console.log("Submitted Data:", payload);
+    alert("Workout logged!");
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
+    <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
       <h1>Hyrox Training Tracker</h1>
 
-      <label>Date:</label><br />
-      <input type="date" value={date} onChange={e => setDate(e.target.value)} /><br /><br />
+      <label>Week:</label>
+      <select value={week} onChange={e => setWeek(e.target.value)}>
+        <option>Week 0</option>
+        <option>Week 1</option>
+      </select>
 
+      {week !== 'Week 0' && (
+        <>
+          <label>Day:</label>
+          <select value={day} onChange={e => setDay(e.target.value)}>
+            {[...Array(7)].map((_, i) => (
+              <option key={i}>{`Day ${i + 1}`}</option>
+            ))}
+          </select>
+        </>
+      )}
+
+      <br /><br />
       <label>Sleep (hrs):</label><br />
       <input type="number" value={sleep} onChange={e => setSleep(e.target.value)} /><br /><br />
 
@@ -46,17 +61,35 @@ function HyroxTrainingTracker() {
       <label>Recovery Notes:</label><br />
       <textarea value={recoveryNotes} onChange={e => setRecoveryNotes(e.target.value)} /><br /><br />
 
-      <h3>Strength Training</h3>
-      {exercises.map((ex, index) => (
-        <div key={index} style={{ marginBottom: 10 }}>
-          <strong>{ex.name}</strong><br />
-          Target Reps: {ex.targetReps}, RPE: {ex.rpe}<br />
-          Reps: <input type="number" value={ex.reps} onChange={e => handleExerciseChange(index, 'reps', e.target.value)} />
-          &nbsp; Weight: <input type="number" value={ex.weight} onChange={e => handleExerciseChange(index, 'weight', e.target.value)} /> kg
-        </div>
-      ))}
+      {week === 'Week 0' && (
+        <>
+          <h3>Week 0 Baseline Testing</h3>
+          <label>Body Weight (kg):</label><br />
+          <input type="number" value={benchmarkData.weight} onChange={e => handleBenchmarkChange('weight', e.target.value)} /><br />
+          <label>Fat %:</label><br />
+          <input type="number" value={benchmarkData.fatPercent} onChange={e => handleBenchmarkChange('fatPercent', e.target.value)} /><br />
+          <label>Muscle %:</label><br />
+          <input type="number" value={benchmarkData.musclePercent} onChange={e => handleBenchmarkChange('musclePercent', e.target.value)} /><br /><br />
 
-      <button onClick={handleSubmit} style={{ marginTop: 20 }}>Save Workout</button>
+          <label>Cholesterol (mmol/L):</label><br />
+          <input type="number" value={benchmarkData.cholesterol} onChange={e => handleBenchmarkChange('cholesterol', e.target.value)} /><br />
+          <label>Glucose (mmol/L):</label><br />
+          <input type="number" value={benchmarkData.glucose} onChange={e => handleBenchmarkChange('glucose', e.target.value)} /><br />
+          <label>CRP (mg/L):</label><br />
+          <input type="number" value={benchmarkData.crp} onChange={e => handleBenchmarkChange('crp', e.target.value)} /><br /><br />
+
+          <label>5km Run Time (mm:ss):</label><br />
+          <input type="text" value={benchmarkData.run5kTime} onChange={e => handleBenchmarkChange('run5kTime', e.target.value)} /><br />
+          <label>1RM Squat (kg):</label><br />
+          <input type="number" value={benchmarkData.squat1RM} onChange={e => handleBenchmarkChange('squat1RM', e.target.value)} /><br />
+          <label>1RM Deadlift (kg):</label><br />
+          <input type="number" value={benchmarkData.deadlift1RM} onChange={e => handleBenchmarkChange('deadlift1RM', e.target.value)} /><br />
+          <label>Metcon Time (mm:ss):</label><br />
+          <input type="text" value={benchmarkData.metconTime} onChange={e => handleBenchmarkChange('metconTime', e.target.value)} /><br /><br />
+        </>
+      )}
+
+      <button onClick={handleSubmit} style={{ marginTop: 20 }}>Save Entry</button>
     </div>
   );
 }
