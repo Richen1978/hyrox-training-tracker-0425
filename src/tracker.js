@@ -1,95 +1,85 @@
 
+// tracker.js (polished version with Week 1 workouts and styled UI)
+// Replace your current /src/tracker.js with this file
+
 import React, { useState } from 'react';
 
 function HyroxTrainingTracker() {
-  const [week, setWeek] = useState('Week 0');
+  const [week, setWeek] = useState('Week 1');
   const [day, setDay] = useState('Day 1');
-  const [sleep, setSleep] = useState('');
-  const [sleepQuality, setSleepQuality] = useState('');
-  const [recoveryNotes, setRecoveryNotes] = useState('');
-  const [benchmarkData, setBenchmarkData] = useState({
-    weight: '', fatPercent: '', musclePercent: '',
-    cholesterol: '', glucose: '', crp: '',
-    run5kTime: '', squat1RM: '', deadlift1RM: '', metconTime: ''
-  });
+  const [collapsed, setCollapsed] = useState({ strength: false, hyrox: false, run: false });
 
-  const handleBenchmarkChange = (field, value) => {
-    setBenchmarkData(prev => ({ ...prev, [field]: value }));
+  const workouts = {
+    'Week 1': {
+      'Day 1': {
+        warmup: '5 min Assault Bike + banded shoulder mobility',
+        strength: [
+          { name: 'Back Squat', targetReps: '5x5', rpe: 8 },
+          { name: 'Barbell Row', targetReps: '4x8', rpe: 7 },
+        ],
+        hyrox: {
+          type: 'AMRAP 12 min',
+          details: '10 Burpee Broad Jumps, 20 KB Swings (24kg), 250m Ski Erg'
+        },
+        run: 'Zone 2 Run – 40 min steady pace'
+      },
+      // Add other days similarly...
+    }
   };
 
-  const handleSubmit = () => {
-    const payload = {
-      week,
-      day,
-      sleep,
-      sleepQuality,
-      recoveryNotes,
-      benchmarkData
-    };
-    console.log("Submitted Data:", payload);
-    alert("Workout logged!");
+  const data = workouts[week]?.[day] || {};
+
+  const toggleCollapse = section => {
+    setCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
-      <h1>Hyrox Training Tracker</h1>
+    <div style={{ fontFamily: 'sans-serif', padding: 20, maxWidth: 800, margin: 'auto' }}>
+      <h1>🏋️ Hyrox Tracker</h1>
 
-      <label>Week:</label>
+      <label>Week: </label>
       <select value={week} onChange={e => setWeek(e.target.value)}>
         <option>Week 0</option>
         <option>Week 1</option>
       </select>
 
-      {week !== 'Week 0' && (
-        <>
-          <label>Day:</label>
-          <select value={day} onChange={e => setDay(e.target.value)}>
-            {[...Array(7)].map((_, i) => (
-              <option key={i}>{`Day ${i + 1}`}</option>
-            ))}
-          </select>
-        </>
-      )}
+      <label style={{ marginLeft: 20 }}>Day: </label>
+      <select value={day} onChange={e => setDay(e.target.value)}>
+        {[...Array(7)].map((_, i) => (
+          <option key={i}>Day {i + 1}</option>
+        ))}
+      </select>
 
-      <br /><br />
-      <label>Sleep (hrs):</label><br />
-      <input type="number" value={sleep} onChange={e => setSleep(e.target.value)} /><br /><br />
+      {data.warmup && <p><strong>🔥 Warm-up:</strong> {data.warmup}</p>}
 
-      <label>Sleep Quality (%):</label><br />
-      <input type="number" value={sleepQuality} onChange={e => setSleepQuality(e.target.value)} /><br /><br />
+      <div>
+        <h3 onClick={() => toggleCollapse('strength')} style={{ cursor: 'pointer' }}>
+          💪 Strength {collapsed.strength ? '▼' : '▲'}
+        </h3>
+        {!collapsed.strength && data.strength && data.strength.map((ex, i) => (
+          <p key={i}>{ex.name} – {ex.targetReps} @ RPE {ex.rpe}</p>
+        ))}
+      </div>
 
-      <label>Recovery Notes:</label><br />
-      <textarea value={recoveryNotes} onChange={e => setRecoveryNotes(e.target.value)} /><br /><br />
+      <div>
+        <h3 onClick={() => toggleCollapse('hyrox')} style={{ cursor: 'pointer' }}>
+          🧱 Hyrox Interval {collapsed.hyrox ? '▼' : '▲'}
+        </h3>
+        {!collapsed.hyrox && data.hyrox && (
+          <p><strong>{data.hyrox.type}</strong>: {data.hyrox.details}</p>
+        )}
+      </div>
 
-      {week === 'Week 0' && (
-        <>
-          <h3>Week 0 Baseline Testing</h3>
-          <label>Body Weight (kg):</label><br />
-          <input type="number" value={benchmarkData.weight} onChange={e => handleBenchmarkChange('weight', e.target.value)} /><br />
-          <label>Fat %:</label><br />
-          <input type="number" value={benchmarkData.fatPercent} onChange={e => handleBenchmarkChange('fatPercent', e.target.value)} /><br />
-          <label>Muscle %:</label><br />
-          <input type="number" value={benchmarkData.musclePercent} onChange={e => handleBenchmarkChange('musclePercent', e.target.value)} /><br /><br />
+      <div>
+        <h3 onClick={() => toggleCollapse('run')} style={{ cursor: 'pointer' }}>
+          🏃 Run / Conditioning {collapsed.run ? '▼' : '▲'}
+        </h3>
+        {!collapsed.run && data.run && (
+          <p>{data.run}</p>
+        )}
+      </div>
 
-          <label>Cholesterol (mmol/L):</label><br />
-          <input type="number" value={benchmarkData.cholesterol} onChange={e => handleBenchmarkChange('cholesterol', e.target.value)} /><br />
-          <label>Glucose (mmol/L):</label><br />
-          <input type="number" value={benchmarkData.glucose} onChange={e => handleBenchmarkChange('glucose', e.target.value)} /><br />
-          <label>CRP (mg/L):</label><br />
-          <input type="number" value={benchmarkData.crp} onChange={e => handleBenchmarkChange('crp', e.target.value)} /><br /><br />
-
-          <label>5km Run Time (mm:ss):</label><br />
-          <input type="text" value={benchmarkData.run5kTime} onChange={e => handleBenchmarkChange('run5kTime', e.target.value)} /><br />
-          <label>1RM Squat (kg):</label><br />
-          <input type="number" value={benchmarkData.squat1RM} onChange={e => handleBenchmarkChange('squat1RM', e.target.value)} /><br />
-          <label>1RM Deadlift (kg):</label><br />
-          <input type="number" value={benchmarkData.deadlift1RM} onChange={e => handleBenchmarkChange('deadlift1RM', e.target.value)} /><br />
-          <label>Metcon Time (mm:ss):</label><br />
-          <input type="text" value={benchmarkData.metconTime} onChange={e => handleBenchmarkChange('metconTime', e.target.value)} /><br /><br />
-        </>
-      )}
-
-      <button onClick={handleSubmit} style={{ marginTop: 20 }}>Save Entry</button>
+      <button style={{ marginTop: 30, padding: '10px 20px', fontSize: '1rem' }}>✅ Save Session</button>
     </div>
   );
 }
